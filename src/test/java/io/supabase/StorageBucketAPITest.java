@@ -3,60 +3,54 @@ package io.supabase;
 
 import io.supabase.data.bucket.Bucket;
 import io.supabase.data.bucket.BucketCreateOptions;
+import io.supabase.data.bucket.BucketUpdateOptions;
 import io.supabase.data.bucket.CreateBucketResponse;
 import io.supabase.errors.StorageException;
 import io.supabase.utils.MessageResponse;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static io.github.jsonSnapshot.SnapshotMatcher.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StorageBucketAPITest {
     private static StorageClient client;
+    private static final String newBucketName = "new-bucket-name-" + LocalDateTime.now();
 
     @BeforeAll
-    public static void initialize() throws ExecutionException, InterruptedException {
-        client = new StorageClient("", "");
-        client.createBucket("testbucket").get();
-        // add files to bucket to make deleteBucket tests work.
+    public static void initialize() {
+        start();
+        client = new StorageClient("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjE5MjkxMDc5ODV9.FhK1kZdHmWdCIEZELt0QDCw6FIlCS8rVmp4RzaeI2LM", "http://localhost:8000/storage/v1/");
     }
 
-    @Test
-    public void createBucket() throws ExecutionException, InterruptedException {
-        CreateBucketResponse message = client.createBucket("firstbucket").get();
-        client.createBucket("secondbucket", new BucketCreateOptions(true)).get();
-
-        Bucket actual = client.getBucket("secondbucket").get();
-        assertEquals(message.getName(), "firstbucket");
-        assertTrue(actual.isBucketPublic());
-
-        // cleanup
-        client.deleteBucket("firstbucket").get();
-        client.deleteBucket("secondbucket").get();
+    @AfterAll
+    public static void afterAll() {
+        validateSnapshots();
     }
 
     @Test
     public void listBuckets() throws ExecutionException, InterruptedException {
         List<Bucket> future = client.listBuckets().get();
 
-        assertEquals(1, future.size());
+        assertTrue(future.size() > 0);
     }
 
     @Test
-    public void getBucket() throws ExecutionException, InterruptedException {
-        Bucket future = client.getBucket("testbucket").get();
+    public void getBucketById() throws ExecutionException, InterruptedException {
+        Bucket future = client.getBucket("bucket2").get();
 
-        assertNotNull(future);
+        expect(future).toMatchSnapshot();
     }
 
     @Test
     public void getBucketThrowsIfNotFound() {
         assertThrows(StorageException.class, () -> {
             try {
-                client.getBucket("thisbucketcertainlydoesnotexist").get();
+                client.getBucket("not-exists-id").get();
             } catch (ExecutionException e) {
                 throw e.getCause();
             }
@@ -64,18 +58,49 @@ public class StorageBucketAPITest {
     }
 
     @Test
-    public void emptyBucket() throws ExecutionException, InterruptedException {
-        MessageResponse message = client.emptyBucket("testbucket").get();
+    @Order(1)
+    public void createBucket() throws ExecutionException, InterruptedException {
+        CreateBucketResponse response = client.createBucket(newBucketName).get();
+        assertEquals(response.getName(), newBucketName);
+    }
 
-        assertEquals(message.getMessage(), "Successfully emptied");
+    @Test
+    public void createPublicBucket() throws ExecutionException, InterruptedException {
+        String bucketName = "my-new-public-bucket" + LocalDateTime.now();
+        client.createBucket(bucketName, new BucketCreateOptions(true)).get();
+        Bucket actual = client.getBucket(bucketName).get();
+
+        assertTrue(actual.isBucketPublic());
+    }
+
+    @Test
+    @Order(2)
+    public void updateBucket() throws ExecutionException, InterruptedException {
+        MessageResponse updateResponse = client.updateBucket(newBucketName, new BucketUpdateOptions(true)).get();
+        expect(updateResponse).toMatchSnapshot();
+        Bucket bucket = client.getBucket(newBucketName).get();
+        assertTrue(bucket.isBucketPublic());
+    }
+
+    @Test
+    @Order(3)
+    public void emptyBucket() throws ExecutionException, InterruptedException {
+        MessageResponse message = client.emptyBucket(newBucketName).get();
+        expect(message).toMatchSnapshot();
+    }
+
+    @Test
+    @Order(4)
+    public void deleteBucket() throws ExecutionException, InterruptedException {
+        MessageResponse response = client.deleteBucket(newBucketName).get();
+        expect(response).toMatchSnapshot();
     }
 
     @Test
     public void deleteBucketThrowsIfNotEmpty() {
-
         assertThrows(StorageException.class, () -> {
             try {
-                client.deleteBucket("testbucket").get();
+                client.deleteBucket("bucket2").get();
             } catch (ExecutionException e) {
                 throw e.getCause();
             }

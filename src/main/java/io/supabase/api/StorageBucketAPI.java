@@ -17,23 +17,19 @@ import java.util.concurrent.CompletableFuture;
 public class StorageBucketAPI implements IStorageBucketAPI {
 
     /**
-     * The API Key which is used to make requests on behalf of.
-     */
-    private final String apiKey;
-
-    /**
      * <p>The url for your project.</p>
      * Example: {@code https://<PROJECT_ID>.supabase.co/storage/v1/}
      */
-    private final String url;
+    private String url;
 
-    private final Map<String, String> headers;
+    private Map<String, String> headers;
 
-    public StorageBucketAPI(String apiKey, String url) {
-        this.apiKey = apiKey;
+    public StorageBucketAPI(String url, Map<String, String> headers) {
         this.url = url;
-        this.headers = new HashMap<>();
-        this.headers.put("Authorization", "Bearer " + apiKey);
+        this.headers = headers;
+    }
+
+    protected StorageBucketAPI() {
     }
 
 

@@ -36,6 +36,12 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.github.json-snapshot</groupId>
+            <artifactId>json-snapshot</artifactId>
+            <version>1.0.17</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <properties>

@@ -1,0 +1,45 @@
+io.supabase.StorageBucketAPITest.deleteBucket=[
+  {
+    "message": "Successfully deleted"
+  }
+]
+
+
+io.supabase.StorageBucketAPITest.emptyBucket=[
+  {
+    "message": "Successfully emptied"
+  }
+]
+
+
+io.supabase.StorageBucketAPITest.getBucket=[
+  {
+    "id": "bucket2",
+    "name": "bucket2",
+    "owner": "4d56e902-f0a0-4662-8448-a4d9e643c142",
+    "isBucketPublic": false,
+    "createdAt": "2021-02-17T04:43:32.770206+00:00",
+    "updatedAt": "2021-02-17T04:43:32.770206+00:00",
+    "bucketPublic": false
+  }
+]
+
+
+io.supabase.StorageBucketAPITest.getBucketById=[
+  {
+    "id": "bucket2",
+    "name": "bucket2",
+    "owner": "4d56e902-f0a0-4662-8448-a4d9e643c142",
+    "isBucketPublic": false,
+    "createdAt": "2021-02-17T04:43:32.770206+00:00",
+    "updatedAt": "2021-02-17T04:43:32.770206+00:00",
+    "bucketPublic": false
+  }
+]
+
+
+io.supabase.StorageBucketAPITest.updateBucket=[
+  {
+    "message": "Successfully updated"
+  }
+]
