@@ -21,3 +21,7 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
+      - name: Run docker compose
+        run: cd infra && docker compose up -d
+      - name: Run tests
+        run: mvn test
