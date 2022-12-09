@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StorageFileAPITest {
     private static String URL = "http://localhost:8000/storage/v1/";
     private static StorageClient client;
-    private static final String newBucketName = "new-bucket-name-" + LocalDateTime.now();
 
     private static String bucketName = "";
     private static File file;
@@ -33,7 +32,6 @@ public class StorageFileAPITest {
 
     @BeforeAll
     public static void initialize() {
-        start();
         client = new StorageClient("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjE5MjkxMDc5ODV9.FhK1kZdHmWdCIEZELt0QDCw6FIlCS8rVmp4RzaeI2LM", URL);
     }
 
@@ -46,7 +44,6 @@ public class StorageFileAPITest {
 
     @AfterAll
     public static void afterAll() {
-        validateSnapshots();
     }
 
     @Test
