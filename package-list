@@ -1,0 +1,6 @@
+io.supabase
+io.supabase.api
+io.supabase.data.bucket
+io.supabase.data.file
+io.supabase.errors
+io.supabase.utils
