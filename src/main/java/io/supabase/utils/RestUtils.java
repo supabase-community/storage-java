@@ -79,7 +79,7 @@ public class RestUtils {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     JsonObject object = MAPPER.fromJson(response.body().string(), JsonObject.class);
-                    future.completeExceptionally(new StorageException(object.get("error").getAsString(), object.get("statusCode").getAsInt(), object.get("message").getAsString()));
+                    future.completeExceptionally(new StorageException(object.get("error").getAsString(), object.get("statusCode").getAsString(), object.get("message").getAsString()));
                     return;
                 }
                 future.complete(MAPPER.fromJson(response.body().string(), type));
@@ -102,7 +102,7 @@ public class RestUtils {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     JsonObject object = MAPPER.fromJson(response.body().string(), JsonObject.class);
-                    future.completeExceptionally(new StorageException(object.get("error").getAsString(), object.get("statusCode").getAsInt(), object.get("message").getAsString()));
+                    future.completeExceptionally(new StorageException(object.get("error").getAsString(), object.get("statusCode").getAsString(), object.get("message").getAsString()));
                     return;
                 }
                 future.complete(new FileDownload(response.body().bytes(), response.body().contentType()));

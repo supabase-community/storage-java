@@ -1,7 +1,7 @@
 package io.supabase.errors;
 
 public class StorageException extends Exception {
-    private final int statusCode;
+    private final String statusCode;
     private final String error;
 
     /**
@@ -12,13 +12,13 @@ public class StorageException extends Exception {
      * @param message the detail message. The detail message is saved for
      *                later retrieval by the {@link #getMessage()} method.
      */
-    public StorageException(String message, int statusCode, String error) {
+    public StorageException(String message, String statusCode, String error) {
         super(message);
         this.statusCode = statusCode;
         this.error = error;
     }
 
-    public int getStatusCode() {
+    public String getStatusCode() {
         return statusCode;
     }
 
