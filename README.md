@@ -63,3 +63,12 @@ Made with [contrib.rocks](https://contrib.rocks).
 ## Contributing
 
 We are more than happy to have contributions! Please submit a PR.
+
+### Local development
+For testing the application you will need to spin up the docker compose found in the `infra` folder.
+<br>
+1. `cd infra`.
+2. `cp .env.example .env`
+3. Fill in the values of the .env
+4. `docker compose up -d`
+<p>Then you can test the application with the default values already in the test files.</p> 
