@@ -155,6 +155,7 @@ public class StorageFileAPI implements IStorageFileAPI {
     public CompletableFuture<List<io.supabase.data.file.File>> list(String path, FileSearchOptions options) {
         JsonObject body = new Gson().toJsonTree(options).getAsJsonObject();
         body.addProperty("prefix", path);
+        body.addProperty("search", "");
         return RestUtils.post(new TypeToken<List<io.supabase.data.file.File>>(){}, headers, this.url + "object/list/" + this.bucketId, body);
     }
 
