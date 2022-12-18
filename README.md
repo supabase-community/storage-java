@@ -54,8 +54,8 @@ public class Main {
 ```
 
 ## Package made possible through the efforts of: 
-<a href="https://github.com/magnushjensen/storage-java/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=magnushjensen/storage-java" />
+<a href="https://github.com/supabase-community/storage-java/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=supabase-community/storage-java" />
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
