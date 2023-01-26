@@ -9,7 +9,6 @@ import io.supabase.data.bucket.CreateBucketResponse;
 import io.supabase.utils.MessageResponse;
 import io.supabase.utils.RestUtils;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -20,34 +19,46 @@ public class StorageBucketAPI implements IStorageBucketAPI {
      * <p>The url for your project.</p>
      * Example: {@code https://<PROJECT_ID>.supabase.co/storage/v1/}
      */
-    private String url;
+    private final String url;
 
-    private Map<String, String> headers;
+    private final Map<String, String> headers;
 
     public StorageBucketAPI(String url, Map<String, String> headers) {
         this.url = url;
         this.headers = headers;
     }
 
-    protected StorageBucketAPI() {
-    }
 
-
+    /**
+     * <p>POST /bucket/</p>
+     *
+     * @param bucketId The name/id of the bucket you want to create.
+     * @return a {@link CreateBucketResponse} object.
+     */
     @Override
     public CompletableFuture<CreateBucketResponse> createBucket(String bucketId) {
         return createBucket(bucketId, new BucketCreateOptions(false));
     }
 
+    /**
+     * <p>POST /bucket/</p>
+     *
+     * @param bucketId The name/id of the bucket you want to create.
+     * @param options  The options you want to pass for the bucket creation.
+     * @return a {@link CreateBucketResponse} object.
+     */
     @Override
     public CompletableFuture<CreateBucketResponse> createBucket(String bucketId, BucketCreateOptions options) {
         JsonObject body = new JsonObject();
         body.addProperty("name", bucketId);
         body.addProperty("id", bucketId);
         body.addProperty("public", options.isPublic());
-        return RestUtils.post(new TypeToken<CreateBucketResponse>(){}, headers, url + "bucket", body);
+        return RestUtils.post(new TypeToken<CreateBucketResponse>() {
+        }, headers, url + "bucket", body);
     }
 
     /**
+     * <p>GET /bucket/</p>
      * Lists all buckets in the project.
      *
      * @return A list of all buckets.
@@ -58,29 +69,58 @@ public class StorageBucketAPI implements IStorageBucketAPI {
         }, headers, url + "bucket");
     }
 
+    /**
+     * <p>POST /bucket/{bucketId}/empty</p>
+     *
+     * @param bucketId The bucket you want to empty.
+     * @return a status message
+     */
     @Override
     public CompletableFuture<MessageResponse> emptyBucket(String bucketId) {
         String urlPath = String.format("bucket/%s/empty", bucketId);
-        return RestUtils.post(new TypeToken<MessageResponse>(){}, headers, url + urlPath, null);
+        return RestUtils.post(new TypeToken<MessageResponse>() {
+        }, headers, url + urlPath, null);
     }
 
+    /**
+     * <p>GET /bucket/{bucketId}/</p>
+     *
+     * @param bucketId The bucket of which you want to retrieve.
+     * @return the asked for bucket
+     */
     @Override
     public CompletableFuture<Bucket> getBucket(String bucketId) {
         String urlPath = String.format("bucket/%s", bucketId);
-        return RestUtils.get(new TypeToken<Bucket>(){}, headers, url + urlPath);
+        return RestUtils.get(new TypeToken<Bucket>() {
+        }, headers, url + urlPath);
     }
 
+    /**
+     * <p>PUT /bucket/{bucketId}/</p>
+     *
+     * @param bucketId The bucket you want to update
+     * @param options  The options to update the bucket to.
+     * @return a status message
+     */
     @Override
     public CompletableFuture<MessageResponse> updateBucket(String bucketId, BucketUpdateOptions options) {
         JsonObject body = new JsonObject();
         body.addProperty("public", options.isPublic());
         String path = String.format("bucket/%s", bucketId);
-        return RestUtils.put(new TypeToken<MessageResponse>(){}, headers, url + path, body);
+        return RestUtils.put(new TypeToken<MessageResponse>() {
+        }, headers, url + path, body);
     }
 
+    /**
+     * <p>DELETE /bucket/{bucketId}</p>
+     *
+     * @param bucketId The bucket of which you want to delete.
+     * @return a status message
+     */
     @Override
     public CompletableFuture<MessageResponse> deleteBucket(String bucketId) {
         String path = String.format("bucket/%s", bucketId);
-        return RestUtils.delete(new TypeToken<MessageResponse>(){}, headers, url + path, null);
+        return RestUtils.delete(new TypeToken<MessageResponse>() {
+        }, headers, url + path, null);
     }
 }
