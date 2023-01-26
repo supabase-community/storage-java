@@ -26,6 +26,8 @@ jobs:
         run: cd infra && docker compose up -d
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
+      - name: Deploy package
+        run: mvn deploy
       - name: Publish Javadocs to GH pages.
         uses: MathieuSoysal/Javadoc-publisher.yml@v2.3.0
         with:
