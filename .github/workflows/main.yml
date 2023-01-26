@@ -19,6 +19,9 @@ jobs:
           java-version: '8'
           distribution: 'adopt'
           cache: maven
+          server-id: 'github'
+          server-username: 'supabase-community'
+          server-password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run docker compose
         run: cd infra && docker compose up -d
       - name: Build with Maven
