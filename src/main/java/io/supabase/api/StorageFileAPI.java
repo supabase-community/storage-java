@@ -7,8 +7,8 @@ import com.google.gson.reflect.TypeToken;
 import io.supabase.data.file.*;
 import io.supabase.utils.HttpMethod;
 import io.supabase.utils.MessageResponse;
-import io.supabase.utils.RequestBodyUtil;
 import io.supabase.utils.RestUtils;
+import io.supabase.utils.Utilities;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +41,7 @@ public class StorageFileAPI implements IStorageFileAPI {
         RequestBody requestBody;
         try {
             fileStream = Files.newInputStream(file.toPath());
-            requestBody = RequestBodyUtil.create(MediaType.parse(Files.probeContentType(Paths.get(file.getPath()))), fileStream);
+            requestBody = Utilities.createRequestBody(MediaType.parse(Files.probeContentType(Paths.get(file.getPath()))), fileStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -107,27 +108,31 @@ public class StorageFileAPI implements IStorageFileAPI {
 
     /**
      * <p>POST /object/sign/{bucketName}</p>
-     * <p>This method just wraps {@link #getSignedUrls(List, int, FileDownloadOption)}</p>
-     * @param path The singular file path that should be signed.
+     * <p>This method just wraps {@link #getSignedUrls(List, int, FileDownloadOption, FileTransformOptions)}</p>
+     *
+     * @param path      The singular file path that should be signed.
      * @param expiresIn how many seconds until the signed url expires.
-     * @param options any additional download options.
+     * @param downloadOptions   any additional download options.
+     * @param transformOptions The transform options if any
      * @return a {@link FileSignedUrlResponse}
      */
     @Override
-    public CompletableFuture<FileSignedUrlResponse> getSignedUrl(String path, int expiresIn, FileDownloadOption options) {
-        CompletableFuture<List<FileSignedUrlResponse>> signedUrlFuture = getSignedUrls(List.of(path), expiresIn, options);
+    public CompletableFuture<FileSignedUrlResponse> getSignedUrl(String path, int expiresIn, FileDownloadOption downloadOptions, FileTransformOptions transformOptions) {
+        CompletableFuture<List<FileSignedUrlResponse>> signedUrlFuture = getSignedUrls(List.of(path), expiresIn, downloadOptions, transformOptions);
         return signedUrlFuture.thenApply((responses) -> responses.get(0));
     }
 
     /**
      * <p>POST /object/sign/{bucketName}</p>
-     * @param paths a list of file paths that should be signed.
+     *
+     * @param paths     a list of file paths that should be signed.
      * @param expiresIn how many seconds until the signed urls expires.
-     * @param options any additional download options.
+     * @param downloadOptions   any additional download options.
+     * @param transformOptions The transform options if any
      * @return a list of {@link FileSignedUrlResponse}
      */
     @Override
-    public CompletableFuture<List<FileSignedUrlResponse>> getSignedUrls(List<String> paths, int expiresIn, FileDownloadOption options) {
+    public CompletableFuture<List<FileSignedUrlResponse>> getSignedUrls(List<String> paths, int expiresIn, FileDownloadOption downloadOptions, FileTransformOptions transformOptions) {
         JsonObject body = new JsonObject();
         JsonArray bodyPaths = new JsonArray();
         for (String path : paths) {
@@ -135,54 +140,49 @@ public class StorageFileAPI implements IStorageFileAPI {
         }
         body.addProperty("expiresIn", expiresIn);
         body.add("paths", bodyPaths);
-        String downloadParams = "";
-        if (options.isDownload()) {
-            downloadParams += "&download=";
-            if (options.getDownloadName() != null) {
-                downloadParams += options.getDownloadName();
-            } else {
-                downloadParams += "true";
-            }
-        }
 
+        Map<String, String> downloadParamsMap = downloadOptions != null ? downloadOptions.convertToMap() : new HashMap<>();
+        Map<String, String> transformParamsMap = transformOptions != null ? transformOptions.convertToMap() : new HashMap<>();
+        Map<String, String> paramsMap = Utilities.combineMaps(downloadParamsMap, transformParamsMap);
         CompletableFuture<List<FileSignedUrlResponse>> signedUrlFuture = RestUtils.post(new TypeToken<List<FileSignedUrlResponse>>() {
         }, headers, this.url + "object/sign/" + bucketId, body);
 
-        String finalDownloadParams = downloadParams;
-        return signedUrlFuture.thenApply(fileSignedUrlResponse -> fileSignedUrlResponse.stream().map((fileSignedUrlResponse1 -> new FileSignedUrlResponse(this.url + fileSignedUrlResponse1.getSignedUrl() + finalDownloadParams))).collect(Collectors.toList()));
+        return signedUrlFuture.thenApply(fileSignedUrlResponse -> fileSignedUrlResponse.stream().map((fileSignedUrlResponse1 -> new FileSignedUrlResponse(this.url + fileSignedUrlResponse1.getSignedUrl() + Utilities.convertMapToQueryParams(paramsMap)))).collect(Collectors.toList()));
     }
 
     /**
-     * <p>Downloads a file from a private bucket. To download something from a public bucket, make a request to the url from {@link #getPublicUrl(String, FileDownloadOption)}</p>
+     * <p>Downloads a file from a private bucket. To download something from a public bucket, make a request to the url from {@link #getPublicUrl(String, FileDownloadOption, FileTransformOptions)}</p>
      * <p>GET /object/authenticated/{bucketName}/{wildcard}</p>
+     *
      * @param path The path of the file to download
+     * @param transformOptions The transform options if any
      * @return a {@link FileDownload}
      */
     @Override
-    public CompletableFuture<FileDownload> download(String path) {
-        Request request = new Request.Builder().url(url + "object/authenticated/" + getFinalPath(path)).get().headers(Headers.of(headers)).build();
+    public CompletableFuture<FileDownload> download(String path, FileTransformOptions transformOptions) {
+        Request request = new Request.Builder().url(url + "object/authenticated/" + getFinalPath(path) + Utilities.convertMapToQueryParams(transformOptions.convertToMap())).get().headers(Headers.of(headers)).build();
 
         return RestUtils.getFile(request);
     }
 
     /**
      * Creates the url for an object in a public bucket
-     * @param path The path of the file the link should point to.
-     * @param options The download options if any.
+     *
+     * @param path    The path of the file the link should point to.
+     * @param downloadOptions The download options if any.
+     * @param transformOptions The transform options if any
      * @return a {@link FilePublicUrlResponse}
      */
     @Override
-    public FilePublicUrlResponse getPublicUrl(String path, FileDownloadOption options) {
-        String downloadParams = "";
-        if (options.isDownload()) {
-            downloadParams += "&download=";
-            if (options.getDownloadName() != null) {
-                downloadParams += options.getDownloadName();
-            } else {
-                downloadParams += "true";
-            }
-        }
-        return new FilePublicUrlResponse(this.url + "object/public/" + getFinalPath(path) + downloadParams);
+    public FilePublicUrlResponse getPublicUrl(String path, FileDownloadOption downloadOptions, FileTransformOptions transformOptions) {
+        boolean wantsTransformation = transformOptions != null;
+        String urlSuffix = wantsTransformation ? "render/image" : "object";
+
+        Map<String, String> transformParamsMap = transformOptions != null ? transformOptions.convertToMap() : new HashMap<>();
+        Map<String, String> downloadParamsMap = downloadOptions != null ? downloadOptions.convertToMap() : new HashMap<>();
+        Map<String, String> combined = Utilities.combineMaps(downloadParamsMap, transformParamsMap);
+
+        return new FilePublicUrlResponse(this.url + urlSuffix + "/public/" + getFinalPath(path) + Utilities.convertMapToQueryParams(combined));
     }
 
     /**

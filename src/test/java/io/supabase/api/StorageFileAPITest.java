@@ -1,8 +1,10 @@
-package io.supabase;
+package io.supabase.api;
 
+import io.supabase.StorageClient;
 import io.supabase.data.bucket.BucketCreateOptions;
 import io.supabase.data.file.*;
 import io.supabase.utils.MessageResponse;
+import io.supabase.utils.Utilities;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -15,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StorageFileAPITest {
-    private static String URL = "http://localhost:8000/storage/v1/";
+    private static final String URL = "http://localhost:8000/storage/v1/";
     private static StorageClient client;
 
     private static String bucketName = "";
@@ -46,27 +48,37 @@ public class StorageFileAPITest {
 
     @Test
     public void getPublicUrl() {
-        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, new FileDownloadOption(false));
+        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, new FileDownloadOption(false), null);
         assertEquals(URL + "object/public/" + bucketName + "/" + uploadPath, res.getPublicUrl());
     }
 
     @Test
     public void getPublicUrlWithDownloadQuery() {
-        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, new FileDownloadOption(true));
-        assertEquals(URL + "object/public/" + bucketName + "/" + uploadPath + "&download=true", res.getPublicUrl());
+        FileDownloadOption downloadOptions = new FileDownloadOption(true);
+        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, downloadOptions, null);
+        assertEquals(URL + "object/public/" + bucketName + "/" + uploadPath + Utilities.convertMapToQueryParams(downloadOptions.convertToMap()), res.getPublicUrl());
     }
 
     @Test
     public void getPublicUrlWithCustomDownloadQuery() {
-        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, new FileDownloadOption("test.jpg"));
-        assertEquals(URL + "object/public/" + bucketName + "/" + uploadPath + "&download=test.jpg", res.getPublicUrl());
+        FileDownloadOption downloadOptions = new FileDownloadOption("test.jpg");
+        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, downloadOptions, null);
+        assertEquals(URL + "object/public/" + bucketName + "/" + uploadPath + Utilities.convertMapToQueryParams(downloadOptions.convertToMap()), res.getPublicUrl());
+    }
+
+    @Test
+    public void getPublicUrlWithTransformOptions() {
+        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, null, 0, FormatOption.NONE);
+        FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, null, transformOptions);
+        System.out.println(res.getPublicUrl());
+        assertEquals(URL + "render/image/public/" + bucketName + "/" + uploadPath + Utilities.convertMapToQueryParams(transformOptions.convertToMap()), res.getPublicUrl());
     }
 
     @Test
     public void signUrl() throws ExecutionException, InterruptedException {
         newBucket(true);
         client.from(bucketName).upload(uploadPath, file).get();
-        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption(false)).get();
+        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption(false), null).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
     }
 
@@ -74,7 +86,7 @@ public class StorageFileAPITest {
     public void signUrlWithDownloadParams() throws ExecutionException, InterruptedException {
         newBucket(true);
         client.from(bucketName).upload(uploadPath, file).get();
-        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption(true)).get();
+        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption(true), null).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
         assertTrue(res.getSignedUrl().contains("&download="));
     }
@@ -83,9 +95,19 @@ public class StorageFileAPITest {
     public void signUrlWithCustomDownloadName() throws ExecutionException, InterruptedException {
         newBucket(true);
         client.from(bucketName).upload(uploadPath, file).get();
-        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption("test.jpg")).get();
+        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption("test.jpg"), null).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
         assertTrue(res.getSignedUrl().contains("&download=test.jpg"));
+    }
+
+    @Test
+    public void signUrlWithTransformParams() throws ExecutionException, InterruptedException {
+        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, ResizeOption.COVER, 0, FormatOption.NONE);
+        newBucket(true);
+        client.from(bucketName).upload(uploadPath, file).get();
+        FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, null, transformOptions).get();
+        assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
+        assertTrue(res.getSignedUrl().contains(Utilities.convertMapToQueryParams(transformOptions.convertToMap())));
     }
 
     @Test
@@ -143,7 +165,7 @@ public class StorageFileAPITest {
     public void downloadFile() throws ExecutionException, InterruptedException {
         newBucket(true);
         client.from(bucketName).upload(uploadPath, file).get();
-        FileDownload fileContents = client.from(bucketName).download(uploadPath).get();
+        FileDownload fileContents = client.from(bucketName).download(uploadPath, null).get();
         assertNotNull(fileContents);
         assertTrue(fileContents.getBytes().length > 0);
         assertEquals("text/plain; charset=UTF-8", fileContents.getType().toString());

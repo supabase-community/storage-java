@@ -1,6 +1,7 @@
-package io.supabase;
+package io.supabase.api;
 
 
+import io.supabase.StorageClient;
 import io.supabase.data.bucket.Bucket;
 import io.supabase.data.bucket.BucketCreateOptions;
 import io.supabase.data.bucket.BucketUpdateOptions;

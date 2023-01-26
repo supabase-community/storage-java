@@ -47,42 +47,46 @@ public interface IStorageFileAPI {
 
     /**
      * <p>POST /object/sign/{bucketName}</p>
-     * <p>This method just wraps {@link #getSignedUrls(List, int, FileDownloadOption)}</p>
+     * <p>This method just wraps {@link #getSignedUrls(List, int, FileDownloadOption, FileTransformOptions)}</p>
      *
      * @param path      The singular file path that should be signed.
      * @param expiresIn how many seconds until the signed url expires.
-     * @param options   any additional download options.
+     * @param downloadOptions   any additional download options.
+     * @param transformOptions The transform options if any
      * @return a {@link FileSignedUrlResponse}
      */
-    CompletableFuture<FileSignedUrlResponse> getSignedUrl(String path, int expiresIn, FileDownloadOption options);
+    CompletableFuture<FileSignedUrlResponse> getSignedUrl(String path, int expiresIn, FileDownloadOption downloadOptions, FileTransformOptions transformOptions);
 
     /**
      * <p>POST /object/sign/{bucketName}</p>
      *
      * @param paths     a list of file paths that should be signed.
      * @param expiresIn how many seconds until the signed urls expires.
-     * @param options   any additional download options.
+     * @param downloadOptions   any additional download options.
+     * @param transformOptions The transform options if any
      * @return a list of {@link FileSignedUrlResponse}
      */
-    CompletableFuture<List<FileSignedUrlResponse>> getSignedUrls(List<String> paths, int expiresIn, FileDownloadOption options);
+    CompletableFuture<List<FileSignedUrlResponse>> getSignedUrls(List<String> paths, int expiresIn, FileDownloadOption downloadOptions, FileTransformOptions transformOptions);
 
     /**
-     * <p>Downloads a file from a private bucket. To download something from a public bucket, make a request to the url from {@link #getPublicUrl(String, FileDownloadOption)}</p>
+     * <p>Downloads a file from a private bucket. To download something from a public bucket, make a request to the url from {@link #getPublicUrl(String, FileDownloadOption, FileTransformOptions)}</p>
      * <p>GET /object/authenticated/{bucketName}/{wildcard}</p>
      *
      * @param path The path of the file to download
+     * @param transformOptions The transform options if any
      * @return a {@link FileDownload}
      */
-    CompletableFuture<FileDownload> download(String path);
+    CompletableFuture<FileDownload> download(String path, FileTransformOptions transformOptions);
 
     /**
      * Creates the url for an object in a public bucket
      *
      * @param path    The path of the file the link should point to.
-     * @param options The download options if any.
+     * @param downloadOptions The download options if any.
+     * @param transformOptions The transform options if any
      * @return a {@link FilePublicUrlResponse}
      */
-    FilePublicUrlResponse getPublicUrl(String path, FileDownloadOption options);
+    FilePublicUrlResponse getPublicUrl(String path, FileDownloadOption downloadOptions, FileTransformOptions transformOptions);
 
     /**
      * <p>POST /object/list/{bucketName}</p>

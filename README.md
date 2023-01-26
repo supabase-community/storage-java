@@ -5,13 +5,15 @@
 # storage-java
 An async Java client library for the [Supabase Storage API](https://github.com/supabase/storage-api)
 
+The version being used supports different version of the storage API, you can find which version supports up to what version in the [CHANGELOG](./CHANGELOG.md)
+
 ## Example
+
 ```java
 import io.supabase.StorageClient;
 import io.supabase.api.IStorageFileAPI;
 import io.supabase.data.bucket.CreateBucketResponse;
-import io.supabase.data.file.FileDownloadOption;
-import io.supabase.data.file.FilePathResponse;
+import io.supabase.data.file.*;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -36,13 +38,13 @@ public class Main {
                 FilePathResponse response = fileAPI.upload("my-secret-image/image.png", new File("file-path-to-image.png")).get();
 
                 // Generate a public url (The link is only valid if the bucket is public).
-                fileAPI.getPublicUrl("my-secret-image/image.png", new FileDownloadOption(false));
+                fileAPI.getPublicUrl("my-secret-image/image.png", new FileDownloadOption(false), new FileTransformOptions(500, 500, ResizeOption.COVER, 50, FormatOption.NONE));
 
                 // Create a signed url to download an object in a private bucket that expires in 60 seconds, and will be downloaded instantly on link as "my-image.png"
-                fileAPI.getSignedUrl("my-secret-image/image.png", 60, new FileDownloadOption("my-image.png"));
+                fileAPI.getSignedUrl("my-secret-image/image.png", 60, new FileDownloadOption("my-image.png"), null);
 
                 // Download the file
-                fileAPI.download("my-secret-image/image.png");
+                fileAPI.download("my-secret-image/image.png", null);
 
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
