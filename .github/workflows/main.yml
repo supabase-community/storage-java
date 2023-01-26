@@ -22,7 +22,7 @@ jobs:
           cache: maven
           server-id: 'github'
           server-username: 'supabase-community'
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-password: ${{ secrets.GITHUB_PACKAGES_PAT }}
 
       - name: Run docker compose
         run: cd infra && docker compose up -d
