@@ -1,13 +1,13 @@
 package io.supabase.data.file;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FileTransformOptions {
     private final int width;
     private final int height;
     private ResizeOption resizeOption;
-    private int quality;
+    private final int quality;
     private FormatOption format;
 
     public FileTransformOptions(int width, int height, ResizeOption resizeOption, int quality, FormatOption format) {
@@ -59,7 +59,7 @@ public class FileTransformOptions {
     }
 
     public Map<String, String> convertToMap() {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new LinkedHashMap<>();
         map.put("resize", this.getResizeOption().getValue());
         map.put("width", Integer.toString(this.getWidth()));
         map.put("height", Integer.toString(this.getHeight()));

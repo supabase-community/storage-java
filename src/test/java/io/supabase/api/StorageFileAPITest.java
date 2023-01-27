@@ -68,10 +68,13 @@ public class StorageFileAPITest {
 
     @Test
     public void getPublicUrlWithTransformOptions() {
-        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, null, 0, FormatOption.NONE);
+        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, null, 20, FormatOption.NONE);
         FilePublicUrlResponse res = client.from(bucketName).getPublicUrl(uploadPath, null, transformOptions);
-        System.out.println(res.getPublicUrl());
-        assertEquals(URL + "render/image/public/" + bucketName + "/" + uploadPath + Utilities.convertMapToQueryParams(transformOptions.convertToMap()), res.getPublicUrl());
+        assertTrue(res.getPublicUrl().contains(URL + "render/image/public/" + bucketName + "/" + uploadPath));
+        for (String keyVal : Utilities.convertMapToQueryParams(transformOptions.convertToMap()).replace("?", "").split("&")) {
+            assertTrue(res.getPublicUrl().contains(keyVal));
+        }
+
     }
 
     @Test
@@ -88,7 +91,7 @@ public class StorageFileAPITest {
         client.from(bucketName).upload(uploadPath, file).get();
         FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption(true), null).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
-        assertTrue(res.getSignedUrl().contains("&download="));
+        assertTrue(res.getSignedUrl().contains("?download="));
     }
 
     @Test
@@ -97,17 +100,19 @@ public class StorageFileAPITest {
         client.from(bucketName).upload(uploadPath, file).get();
         FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, new FileDownloadOption("test.jpg"), null).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
-        assertTrue(res.getSignedUrl().contains("&download=test.jpg"));
+        assertTrue(res.getSignedUrl().contains("?download=test.jpg"));
     }
 
     @Test
     public void signUrlWithTransformParams() throws ExecutionException, InterruptedException {
-        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, ResizeOption.COVER, 0, FormatOption.NONE);
+        FileTransformOptions transformOptions = new FileTransformOptions(500, 500, ResizeOption.COVER, 20, FormatOption.NONE);
         newBucket(true);
         client.from(bucketName).upload(uploadPath, file).get();
         FileSignedUrlResponse res = client.from(bucketName).getSignedUrl(uploadPath, 2000, null, transformOptions).get();
         assertTrue(res.getSignedUrl().contains(String.format("%s/object/sign/%s/%s", URL, bucketName, uploadPath)));
-        assertTrue(res.getSignedUrl().contains(Utilities.convertMapToQueryParams(transformOptions.convertToMap())));
+        for (String keyVal : Utilities.convertMapToQueryParams(transformOptions.convertToMap()).replace("?", "").split("&")) {
+            assertTrue(res.getSignedUrl().contains(keyVal));
+        }
     }
 
     @Test

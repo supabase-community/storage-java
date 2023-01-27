@@ -160,7 +160,8 @@ public class StorageFileAPI implements IStorageFileAPI {
      */
     @Override
     public CompletableFuture<FileDownload> download(String path, FileTransformOptions transformOptions) {
-        Request request = new Request.Builder().url(url + "object/authenticated/" + getFinalPath(path) + Utilities.convertMapToQueryParams(transformOptions.convertToMap())).get().headers(Headers.of(headers)).build();
+        Map<String, String> transformParamsMap = transformOptions != null ? transformOptions.convertToMap() : new HashMap<>();
+        Request request = new Request.Builder().url(url + "object/authenticated/" + getFinalPath(path) + Utilities.convertMapToQueryParams(transformParamsMap)).get().headers(Headers.of(headers)).build();
 
         return RestUtils.getFile(request);
     }
