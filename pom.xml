@@ -6,7 +6,7 @@
 
     <groupId>io.supabase</groupId>
     <artifactId>storage-java</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <name>Storage Java</name>
     <description>An async client library for the Supabase Storage API in Java</description>
