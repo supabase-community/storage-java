@@ -20,9 +20,6 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: maven
-          server-id: 'github'
-          server-username: 'supabase-community'
-          server-password: ${{ secrets.PACKAGES_PAT }}
 
       - name: Run docker compose
         run: cd infra && docker compose up -d
@@ -32,6 +29,8 @@ jobs:
 
       - name: Deploy package
         run: mvn deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.PACKAGES_PAT }}
 
       - name: Publish Javadocs to GH pages.
         uses: MathieuSoysal/Javadoc-publisher.yml@v2.3.0
