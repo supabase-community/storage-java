@@ -14,15 +14,15 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v3
 
-      - name: Setup JDK 8
+      - name: Setup JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'adopt'
           cache: maven
           server-id: 'github'
           server-username: 'supabase-community'
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-password: ${{ secrets.PACKAGES_PAT }}
 
       - name: Run docker compose
         run: cd infra && docker compose up -d
@@ -38,5 +38,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           javadoc-branch: javadoc
-          java-version: 8
+          java-version: 17
           project: maven

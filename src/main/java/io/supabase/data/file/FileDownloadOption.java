@@ -1,5 +1,8 @@
 package io.supabase.data.file;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class FileDownloadOption {
     private String downloadName;
     private final boolean download;
@@ -19,5 +22,12 @@ public class FileDownloadOption {
 
     public boolean isDownload() {
         return download;
+    }
+
+    public Map<String, String> convertToMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        if (this.isDownload()) map.put("download", this.getDownloadName() != null ? this.getDownloadName() : "true");
+
+        return map;
     }
 }

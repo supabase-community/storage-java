@@ -12,7 +12,7 @@ public class StorageClient extends StorageBucketAPI implements IStorageClient {
     private final Map<String, String> headers;
 
     public StorageClient(String apiKey, String url) {
-        this(url, new HashMap<String, String>() {{
+        this(url, new HashMap<>() {{
             put("Authorization", "Bearer " + apiKey);
         }});
         // Validate URL and throw if not a valid url.
