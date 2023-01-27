@@ -7,6 +7,9 @@ An async Java client library for the [Supabase Storage API](https://github.com/s
 
 The version being used supports different version of the storage API, you can find which version supports up to what version in the [CHANGELOG](./CHANGELOG.md)
 
+## Installation
+For installation please see the [packages](https://github.com/supabase-community/storage-java/packages) section, it will show you how the dependency block should look.
+
 ## Example
 
 ```java
