@@ -10,4 +10,11 @@ public class CreateBucketResponse {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "CreateBucketResponse{" +
+            "name='" + name + '\'' +
+            '}';
+    }
 }

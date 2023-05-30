@@ -7,6 +7,7 @@ import io.supabase.data.bucket.BucketCreateOptions;
 import io.supabase.data.bucket.BucketUpdateOptions;
 import io.supabase.data.bucket.CreateBucketResponse;
 import io.supabase.errors.StorageException;
+import io.supabase.utils.FileSize;
 import io.supabase.utils.MessageResponse;
 import org.junit.jupiter.api.*;
 
@@ -60,24 +61,30 @@ public class StorageBucketAPITest {
 
     @Test
     @Order(1)
-    public void createBucket() throws ExecutionException, InterruptedException {
+    public void createBucketSuccessfully() throws ExecutionException, InterruptedException {
         CreateBucketResponse response = client.createBucket(newBucketName).get();
         assertEquals(response.getName(), newBucketName);
+
     }
 
     @Test
-    public void createPublicBucket() throws ExecutionException, InterruptedException {
+    public void createPublicBucketSuccessfully() throws ExecutionException, InterruptedException {
         String bucketName = "my-new-public-bucket" + LocalDateTime.now();
-        client.createBucket(bucketName, new BucketCreateOptions(true)).get();
+        FileSize fileSizeLimit = new FileSize(0);
+        List<String> mimeTypes = List.of("image/png", "image/jpeg");
+        client.createBucket(bucketName, new BucketCreateOptions(true, fileSizeLimit, mimeTypes)).get();
         Bucket actual = client.getBucket(bucketName).get();
 
         assertTrue(actual.isBucketPublic());
+        assertFalse(actual.allowedMimeTypes().isEmpty());
+        assertTrue(actual.allowedMimeTypes().containsAll(mimeTypes));
+        Assertions.assertEquals(fileSizeLimit.getFileSize(), actual.fileSizeLimit().getFileSize());
     }
 
     @Test
     @Order(2)
-    public void updateBucket() throws ExecutionException, InterruptedException {
-        MessageResponse updateResponse = client.updateBucket(newBucketName, new BucketUpdateOptions(true)).get();
+    public void updateBucketSuccessfully() throws ExecutionException, InterruptedException {
+        MessageResponse updateResponse = client.updateBucket(newBucketName, new BucketUpdateOptions(true, new FileSize(0), null)).get();
         expect(updateResponse).toMatchSnapshot();
         Bucket bucket = client.getBucket(newBucketName).get();
         assertTrue(bucket.isBucketPublic());

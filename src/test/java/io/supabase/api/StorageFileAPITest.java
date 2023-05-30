@@ -3,6 +3,7 @@ package io.supabase.api;
 import io.supabase.StorageClient;
 import io.supabase.data.bucket.BucketCreateOptions;
 import io.supabase.data.file.*;
+import io.supabase.utils.FileSize;
 import io.supabase.utils.MessageResponse;
 import io.supabase.utils.Utilities;
 import org.junit.jupiter.api.*;
@@ -26,7 +27,7 @@ public class StorageFileAPITest {
 
     private static String newBucket(boolean isPublic) throws ExecutionException, InterruptedException {
         String bucketName = "bucket-" + LocalDateTime.now();
-        client.createBucket(bucketName, new BucketCreateOptions(isPublic)).get();
+        client.createBucket(bucketName, new BucketCreateOptions(isPublic, new FileSize(0), null)).get();
         return bucketName;
     }
 
