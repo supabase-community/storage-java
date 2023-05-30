@@ -10,8 +10,8 @@ services:
       KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
       KONG_PLUGINS: request-transformer,cors,key-auth,http-log
     ports:
-      - "8000:8000/tcp"
-      - "8443:8443/tcp"
+      - 8000:8000/tcp
+      - 8443:8443/tcp
   rest:
     image: postgrest/postgrest:latest
     ports:
@@ -38,14 +38,17 @@ services:
       ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYxMzUzMTk4NSwiZXhwIjoxOTI5MTA3OTg1fQ.ReNhHIoXIOa-8tL1DO3e26mJmOTnYuvdgobwIYGzrLQ
       SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjEzNTMxOTg1LCJleHAiOjE5MjkxMDc5ODV9.FhK1kZdHmWdCIEZELt0QDCw6FIlCS8rVmp4RzaeI2LM
       PROJECT_REF: bjwdssmqcnupljrqypxz # can be any random string
-      REGION: eu-west-1 # region where your bucket is located
       POSTGREST_URL: http://rest:3000
-      GLOBAL_S3_BUCKET: java-supa-storage-testing  # name of s3 bucket where you want to store objects
       PGRST_JWT_SECRET: super-secret-jwt-token-with-at-least-32-characters-long
-      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
-      PGOPTIONS: "-c search_path=storage"
+
+      REGION: eu-west-1 # region where your bucket is located
+      GLOBAL_S3_BUCKET: java-supa-storage-testing  # name of s3 bucket where you want to store objects
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+      PGOPTIONS: "-c search_path=storage"
+
       FILE_SIZE_LIMIT: 52428800
       STORAGE_BACKEND: file
       FILE_STORAGE_BACKEND_PATH: /tmp/storage
@@ -54,13 +57,12 @@ services:
     volumes:
       - assets-volume:/tmp/storage
     healthcheck:
-      test: [ 'CMD-SHELL', 'curl -f -LI http://localhost:5000/status' ]
-
+      test: ['CMD-SHELL', 'curl -f -LI http://localhost:5000/status']
   db:
     build:
       context: ./postgres
     ports:
-      - "5432:5432"
+      - 5432:5432
     command:
       - postgres
       - -c
@@ -79,9 +81,9 @@ services:
   imgproxy:
     image: darthsim/imgproxy
     ports:
-      - "50020:8080"
+      - 50020:8080
     volumes:
-      - assets-volume:/tmp/storage
+      -   assets-volume:/tmp/storage
     environment:
       - IMGPROXY_LOCAL_FILESYSTEM_ROOT=/
       - IMGPROXY_USE_ETAG=true

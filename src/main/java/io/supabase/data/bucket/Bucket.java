@@ -1,49 +1,28 @@
 package io.supabase.data.bucket;
 
 
+import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
+import io.supabase.utils.FileSize;
 
-public class Bucket {
-    private final String id;
-    private final String name;
-    private final String owner;
-    @SerializedName("public")
-    private final boolean isBucketPublic;
-    @SerializedName("created_at")
-    private final String createdAt;
-    @SerializedName("updated_at")
-    private final String updatedAt;
+import java.util.List;
 
-    public Bucket(String id, String name, String owner, boolean isBucketPublic, String createdAt, String updatedAt) {
-        this.id = id;
-        this.name = name;
-        this.owner = owner;
-        this.isBucketPublic = isBucketPublic;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
+public record Bucket(String id, String name, String owner,
+                     @SerializedName("public") boolean isBucketPublic,
+                     @SerializedName("file_size_limit") @JsonAdapter(FileSize.class) FileSize fileSizeLimit,
+                     @SerializedName("allowed_mime_types") List<String> allowedMimeTypes,
+                     @SerializedName("created_at") String createdAt,
+                     @SerializedName("updated_at") String updatedAt) {
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public boolean isBucketPublic() {
-        return isBucketPublic;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
+    @Override
+    public String toString() {
+        return "Bucket{" +
+            "id='" + id + '\'' +
+            ", name='" + name + '\'' +
+            ", owner='" + owner + '\'' +
+            ", isBucketPublic=" + isBucketPublic +
+            ", createdAt='" + createdAt + '\'' +
+            ", updatedAt='" + updatedAt + '\'' +
+            '}';
     }
 }

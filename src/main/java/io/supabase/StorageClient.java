@@ -15,7 +15,7 @@ public class StorageClient extends StorageBucketAPI implements IStorageClient {
         this(url, new HashMap<>() {{
             put("Authorization", "Bearer " + apiKey);
         }});
-        // Validate URL and throw if not a valid url.
+        //TODO: Validate URL and throw if not a valid url.
     }
 
     private StorageClient(String url, Map<String, String> headers) {

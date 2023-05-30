@@ -1,11 +1,13 @@
 package io.supabase.api;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.supabase.data.bucket.Bucket;
 import io.supabase.data.bucket.BucketCreateOptions;
 import io.supabase.data.bucket.BucketUpdateOptions;
 import io.supabase.data.bucket.CreateBucketResponse;
+import io.supabase.utils.FileSize;
 import io.supabase.utils.MessageResponse;
 import io.supabase.utils.RestUtils;
 
@@ -37,7 +39,7 @@ public class StorageBucketAPI implements IStorageBucketAPI {
      */
     @Override
     public CompletableFuture<CreateBucketResponse> createBucket(String bucketId) {
-        return createBucket(bucketId, new BucketCreateOptions(false));
+        return createBucket(bucketId, new BucketCreateOptions(false, new FileSize(0), null));
     }
 
     /**
@@ -50,9 +52,15 @@ public class StorageBucketAPI implements IStorageBucketAPI {
     @Override
     public CompletableFuture<CreateBucketResponse> createBucket(String bucketId, BucketCreateOptions options) {
         JsonObject body = new JsonObject();
+        JsonArray allowedMimeTypes = new JsonArray();
+        for (String mimeType : options.getAllowedMimeTypes()) {
+            allowedMimeTypes.add(mimeType);
+        }
         body.addProperty("name", bucketId);
         body.addProperty("id", bucketId);
         body.addProperty("public", options.isPublic());
+        body.addProperty("file_size_limit", options.getFileSizeLimit().getFileSizeAsB());
+        body.add("allowed_mime_types", allowedMimeTypes);
         return RestUtils.post(new TypeToken<CreateBucketResponse>() {
         }, headers, url + "bucket", body);
     }

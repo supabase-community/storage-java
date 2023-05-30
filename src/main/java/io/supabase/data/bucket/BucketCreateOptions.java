@@ -1,8 +1,11 @@
 package io.supabase.data.bucket;
 
-public class BucketCreateOptions extends BucketOptions {
+import io.supabase.utils.FileSize;
 
-    public BucketCreateOptions(boolean isPublic) {
-        super(isPublic);
+import java.util.List;
+
+public class BucketCreateOptions extends BucketOptions {
+    public BucketCreateOptions(boolean isPublic, FileSize fileSizeLimit, List<String> allowedMimeTypes) {
+        super(isPublic, fileSizeLimit, allowedMimeTypes == null ? List.of() : allowedMimeTypes);
     }
 }
